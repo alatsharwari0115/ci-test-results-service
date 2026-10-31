@@ -6,6 +6,6 @@ app = FastAPI()
 def read_root():
     return {"message": "CI test results serivice is running"}
 
-@app.get("/heath")
+@app.get("/health")
 def heath():
     return {"status": "ok"}
