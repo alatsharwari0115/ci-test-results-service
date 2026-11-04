@@ -37,4 +37,13 @@ def test_post_invalid_status_returns_422():
     assert response.status_code == 422
     error = response.json()['detail']
     assert error[0]['loc'] == ['body','status']
+
+def test_post_missing_commit_sha_returns_422():
+    response = client.post("/results", json = {
+        "test_name": "test_login",
+        "status": "failed",
+        "duration_ms": 120,})
+    assert response.status_code == 422
+    error = response.json()['detail']
+    assert error[0]['loc'] == ['body','commit_sha']
     
