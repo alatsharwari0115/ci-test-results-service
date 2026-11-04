@@ -1,5 +1,10 @@
 from fastapi.testclient import TestClient
-from main import app
+import pytest
+from main import app, results
+
+@pytest.fixture(autouse=True)
+def clear_results():
+    results.clear()
 
 client = TestClient(app)
 
@@ -13,7 +18,7 @@ def test_root_returns_running_message():
     assert response.status_code == 200
     assert response.json() == {"message":"CI test results service is running"}
 
-def test_returns_404_given_non_existent_service():
+def test_unknown_path_returns_404():
     response = client.get("/nope")
     assert response.status_code == 404
 
@@ -47,3 +52,13 @@ def test_post_missing_commit_sha_returns_422():
     error = response.json()['detail']
     assert error[0]['loc'] == ['body','commit_sha']
     
+def test_posted_results_appear_in_the_results_list():
+    payload = {"test_name": "test_login","status": "passed","commit_sha": "abc123","duration_ms": 120,}
+    post_response = client.post("/results", json = payload)
+    assert post_response.status_code == 201
+    assert post_response.json() == {"stored": 1}
+
+    get_response = client.get("/results")
+    assert get_response.status_code == 200
+    assert get_response.json() == [payload]
+  
