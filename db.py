@@ -1,5 +1,4 @@
 import sqlite3
-from main import results
 
 DB_PATH = "results.db"
 

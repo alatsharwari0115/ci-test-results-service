@@ -1,10 +1,13 @@
 from fastapi.testclient import TestClient
 import pytest
-from main import app, results
+from main import app
+import db
 
 @pytest.fixture(autouse=True)
-def clear_results():
-    results.clear()
+def temp_db(tmp_path, monkeypatch):
+    monkeypatch.setattr(db,'DB_PATH',str(tmp_path / "test.db"))
+    db.init_db()
+    print(tmp_path)
 
 client = TestClient(app)
 
@@ -56,9 +59,9 @@ def test_posted_results_appear_in_the_results_list():
     payload = {"test_name": "test_login","status": "passed","commit_sha": "abc123","duration_ms": 120,}
     post_response = client.post("/results", json = payload)
     assert post_response.status_code == 201
-    assert post_response.json() == {"stored": 1}
 
     get_response = client.get("/results")
+    print(get_response.json())
     assert get_response.status_code == 200
     assert get_response.json() == [payload]
   

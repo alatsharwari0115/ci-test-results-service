@@ -2,16 +2,22 @@ from fastapi import HTTPException
 from fastapi import FastAPI
 from typing import Literal
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
+import db
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    db.init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 class ResultIn(BaseModel):
     test_name: str
     status: Literal["passed","failed"]
     commit_sha: str
     duration_ms: int
-
-results: list[ResultIn] = []
 
 @app.get("/")
 def read_root():
@@ -31,9 +37,9 @@ def unavailable():
 
 @app.post("/results",status_code=201)
 def add_result(result:ResultIn):
-    results.append(result)
-    return {"stored": len(results)}
-
+    new_id = db.insert_results(result.test_name,result.status,result.commit_sha,result.duration_ms)
+    return {'id':new_id}
+   
 @app.get("/results")
 def get_results():
-    return results
+    return db.list_results()
