@@ -61,7 +61,14 @@ def test_posted_results_appear_in_the_results_list():
     assert post_response.status_code == 201
 
     get_response = client.get("/results")
-    print(get_response.json())
     assert get_response.status_code == 200
     assert get_response.json() == [payload]
-  
+
+def test_post_results_returns_sequential_ids():
+    payload = {"test_name": "test_login","status": "passed","commit_sha": "abc123","duration_ms": 120,}
+    first = client.post("/results", json = payload)
+    second = client.post("/results", json = payload)
+    
+    assert first.json() == {'id': 1}
+    assert second.json() == {'id': 2}
+
