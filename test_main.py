@@ -7,7 +7,6 @@ import db
 def temp_db(tmp_path, monkeypatch):
     monkeypatch.setattr(db,'DB_PATH',str(tmp_path / "test.db"))
     db.init_db()
-    print(tmp_path)
 
 client = TestClient(app)
 
@@ -71,4 +70,15 @@ def test_post_results_returns_sequential_ids():
     
     assert first.json() == {'id': 1}
     assert second.json() == {'id': 2}
+
+def test_mixed_results_per_commit_returns_flaky_tests():
+    payload1 = {"test_name": "test_login","status": "passed","commit_sha": "abc123","duration_ms": 120,}
+    payload2 = {"test_name": "test_login","status": "failed","commit_sha": "abc123","duration_ms": 120,}
+    client.post("/results", json = payload1)
+    client.post("/results", json = payload2)
+    response = client.get("/flaky")
+
+    assert response.status_code == 200
+    assert response.json() == [{'test_name': 'test_login', 'commit_sha': 'abc123'}]
+
 

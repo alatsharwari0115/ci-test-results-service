@@ -37,9 +37,13 @@ def unavailable():
 
 @app.post("/results",status_code=201)
 def add_result(result:ResultIn):
-    new_id = db.insert_results(result.test_name,result.status,result.commit_sha,result.duration_ms)
+    new_id = db.insert_result(result.test_name,result.status,result.commit_sha,result.duration_ms)
     return {'id':new_id}
    
 @app.get("/results")
 def get_results():
     return db.list_results()
+
+@app.get("/flaky")
+def flaky_tests():
+    return db.find_flaky_tests()

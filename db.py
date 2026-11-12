@@ -19,7 +19,7 @@ def init_db():
             )
         """)
 
-def insert_results(test_name, status, commit_sha, duration_ms):
+def insert_result(test_name, status, commit_sha, duration_ms):
     with get_connection() as conn:
         cur = conn.execute(
             "INSERT INTO results (test_name, status, commit_sha, duration_ms) VALUES (?, ?, ?, ?)",
@@ -31,5 +31,12 @@ def list_results():
     with get_connection() as conn:
         rows = conn.execute(
             "SELECT test_name, status, commit_sha, duration_ms FROM results ORDER BY id"
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+def find_flaky_tests():
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT test_name,commit_sha FROM results GROUP BY test_name, commit_sha HAVING COUNT(DISTINCT status) > 1"
         ).fetchall()
     return [dict(row) for row in rows]
