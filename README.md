@@ -56,6 +56,7 @@ Tests use a temporary database, so they never touch real data.
 - Docker image
 - GitHub Actions CI pipeline
 - Move from SQLite to PostgreSQL
+- Docker: the SQLite file lives inside the container, so data is lost when the container is removed. Planned: a mounted volume, or PostgreSQL as a separate service.
 
 ## Status
 In progress
