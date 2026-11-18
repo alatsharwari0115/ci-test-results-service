@@ -1,3 +1,5 @@
+![tests](https://github.com/alatsharwari0115/ci-test-results-service/actions/workflows/tests.yml/badge.svg)
+
 # CI Test Results Service
 
 A backend service that collects CI test results and flags flaky tests.
