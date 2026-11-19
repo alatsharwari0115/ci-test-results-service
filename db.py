@@ -40,3 +40,25 @@ def find_flaky_tests():
             "SELECT test_name,commit_sha FROM results GROUP BY test_name, commit_sha HAVING COUNT(DISTINCT status) > 1"
         ).fetchall()
     return [dict(row) for row in rows]
+
+def flakiness_rates():
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT test_name,
+                   COUNT(*) AS commits,
+                   SUM(CASE WHEN statuses > 1 THEN 1 ELSE 0 END) AS flaky_commits
+            FROM (
+                SELECT test_name, commit_sha, COUNT(DISTINCT status) AS statuses
+                FROM results
+                GROUP BY test_name, commit_sha
+            )
+            GROUP BY test_name
+        """).fetchall()
+
+        results = []
+        for row in rows:
+            item = dict(row)
+            item['flakiness_rate'] = round(item["flaky_commits"] / item["commits"], 2)
+            results.append(item)
+        return results
+

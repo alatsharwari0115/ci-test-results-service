@@ -30,6 +30,20 @@ def test_different_results_on_different_commits_not_flagged():
     db.insert_result("test_login", "passed", "xyz123", 120)
     assert db.find_flaky_tests() == []
 
+def test_flakiness_rate_is_returned_per_test():
+    db.insert_result("test_login", "failed", "abc123", 120)
+    db.insert_result("test_login", "passed", "abc123", 120)
+    db.insert_result("test_login", "passed", "def456", 120)
+    db.insert_result("test_login", "passed", "def456", 120)
+    db.insert_result("test_search", "failed", "abc123", 120)
+    results = db.flakiness_rates()
+    assert results[0]['flakiness_rate'] == 0.5
+    assert results[1]['flakiness_rate'] == 0.0
+
+def test_flakiness_rate_on_empty_database():
+    assert db.flakiness_rates() == []
+
+
 
 
 
