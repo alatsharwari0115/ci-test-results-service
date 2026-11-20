@@ -81,4 +81,17 @@ def test_mixed_results_per_commit_returns_flaky_tests():
     assert response.status_code == 200
     assert response.json() == [{'test_name': 'test_login', 'commit_sha': 'abc123'}]
 
+def test_flaky_rates_endpoint_returns_rate_per_test():
+    def post(name,sha,status):
+        response = client.post("/results", json = {"test_name": name,"status": status,"commit_sha": sha,"duration_ms": 120,})
+        assert response.status_code == 201
+    
+    post("test_login","abc123",'passed')
+    post("test_login","abc123",'failed')
+    post("test_login","def123",'passed')
+    post("test_search","def123",'passed')
+    post("test_search","def123",'failed')
 
+    response = client.get("/flaky/rates")
+
+    assert response.json() == [{'test_name': 'test_login', 'commits': 2, 'flaky_commits': 1, 'flakiness_rate': 0.5}, {'test_name': 'test_search', 'commits': 1, 'flaky_commits': 1, 'flakiness_rate': 1.0}]

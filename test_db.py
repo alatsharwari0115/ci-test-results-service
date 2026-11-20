@@ -37,10 +37,9 @@ def test_flakiness_rate_is_returned_per_test():
     db.insert_result("test_login", "passed", "def456", 120)
     db.insert_result("test_search", "failed", "abc123", 120)
     results = db.flakiness_rates()
-    assert results[0]['flakiness_rate'] == 0.5
-    assert results[1]['flakiness_rate'] == 0.0
+    assert results == [{"test_name": "test_login", "commits": 2, "flaky_commits": 1, "flakiness_rate": 0.5},{"test_name": "test_search", "commits": 1, "flaky_commits": 0, "flakiness_rate": 0.0},]
 
-def test_flakiness_rate_on_empty_database():
+def test_flakiness_rate_on_empty_database_returns_empty_list():
     assert db.flakiness_rates() == []
 
 

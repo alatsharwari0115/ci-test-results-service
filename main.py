@@ -47,3 +47,8 @@ def get_results():
 @app.get("/flaky")
 def flaky_tests():
     return db.find_flaky_tests()
+
+@app.get("/flaky/rates")
+def flakiness_rates():
+    return db.flakiness_rates()
+
